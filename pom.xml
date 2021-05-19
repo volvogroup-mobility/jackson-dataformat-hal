@@ -5,12 +5,12 @@
     
     <name>Jackson HAL Dataformat</name>
     <groupId>io.openapitools.jackson.dataformat</groupId>
-    <version>1.0.8</version>
+    <version>1.0.8-volvo1</version>
     <artifactId>jackson-dataformat-hal</artifactId>
     <packaging>jar</packaging>
 
     <description>Dataformat extension for Jackson to handle the HAL JSON format.</description>
-    <url>https://github.com/openapi-tools/jackson-dataformat-hal</url>
+    <url>https://github.com/volvogroup-mobility/jackson-dataformat-hal</url>
 
     <licenses>
         <license>
@@ -26,23 +26,32 @@
           <organization>Open API Tools</organization>
           <organizationUrl>https://github.com/openapitools</organizationUrl>
         </developer>
+        <developer>
+            <id>timothy-volvo</id>
+            <name>Timothy Rundle</name>
+            <email>timothy.rundle@volvo.com</email>
+            <organizationUrl>https://www.volvogroup.com/</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/openapi-tools/jackson-dataformat-hal.git</connection>
-        <developerConnection>scm:git:https://github.com/openapi-tools/jackson-dataformat-hal.git</developerConnection>
-        <url>https://github.com/openapi-tools/jackson-dataformat-hal/tree/master</url>
-      <tag>v1.0.8</tag>
+        <connection>scm:git:https://github.com/volvogroup-mobility/jackson-dataformat-hal.git</connection>
+        <developerConnection>scm:git:https://github.com/volvogroup-mobility/jackson-dataformat-hal.git</developerConnection>
+        <url>https://github.com/volvogroup-mobility/jackson-dataformat-hal/tree/master</url>
+      <tag>v1.0.8-volvo1</tag>
     </scm>
 
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>mcoe-java</id>
+            <url>https://pkgs.dev.azure.com/volvogroup/MCoE/_packaging/mcoe-java/maven/v1</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>mcoe-java</id>
+            <url>https://pkgs.dev.azure.com/volvogroup/MCoE/_packaging/mcoe-java/maven/v1</url>
         </repository>
     </distributionManagement>
 
