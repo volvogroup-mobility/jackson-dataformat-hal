@@ -50,7 +50,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <com.fasterxml.jackson.version>2.13.4</com.fasterxml.jackson.version>
+        <com.fasterxml.jackson.version>2.21.3</com.fasterxml.jackson.version>
+        <com.fasterxml.jackson.annotations.version>2.21</com.fasterxml.jackson.annotations.version>
         <tools.jackson.version>3.0.3</tools.jackson.version>
         <junit.version>5.7.0</junit.version>
         <org.mockito.version>3.6.28</org.mockito.version>
@@ -58,6 +59,7 @@
     </properties>
 
     <modules>
+        <module>jackson-dataformat-hal-core</module>
         <module>jackson-dataformat-hal-v2</module>
     </modules>
 
