@@ -61,6 +61,7 @@
     <modules>
         <module>jackson-dataformat-hal-core</module>
         <module>jackson-dataformat-hal-v2</module>
+        <module>jackson-dataformat-hal-v3</module>
     </modules>
 
     <build>
