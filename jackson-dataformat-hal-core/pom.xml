@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.openapitools.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-hal-parent</artifactId>
-        <version>1.0.10-SNAPSHOT</version>
+        <version>1.1.0-ABVOLVO.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
