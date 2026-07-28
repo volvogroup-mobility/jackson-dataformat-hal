@@ -13,10 +13,12 @@ import tools.jackson.databind.ser.BeanPropertyWriter;
 import tools.jackson.databind.ser.bean.BeanSerializerBase;
 import tools.jackson.databind.ser.impl.ObjectIdWriter;
 import io.openapitools.jackson.dataformat.hal.HALLink;
+import io.openapitools.jackson.dataformat.hal.HALTemplate;
 import io.openapitools.jackson.dataformat.hal.annotation.Curie;
 import io.openapitools.jackson.dataformat.hal.annotation.Curies;
 import io.openapitools.jackson.dataformat.hal.annotation.EmbeddedResource;
 import io.openapitools.jackson.dataformat.hal.annotation.Link;
+import io.openapitools.jackson.dataformat.hal.annotation.Template;
 
 import java.util.*;
 
@@ -120,6 +122,7 @@ public class HALBeanSerializer extends BeanSerializerBase {
 
         private List<BeanPropertyWriter> state = new ArrayList<>();
         private Map<String, LinkProperty> links = new TreeMap<>();
+        private Map<String, TemplateProperty> templates = new TreeMap<>();
         private Map<String, BeanPropertyWriter> embedded = new TreeMap<>();
 
         // All of the possible curies that COULD be used (provided via Curie/Curies annotations)
@@ -166,6 +169,13 @@ public class HALBeanSerializer extends BeanSerializerBase {
                             addLinks(relation, (Collection<HALLink>) prop.get(bean), curie);
                         } else if (value instanceof HALLink) {
                             addLink(relation, (HALLink) prop.get(bean), curie);
+                        }
+                    } else if (prop.getAnnotation(Template.class) != null) {
+                        Template t = prop.getAnnotation(Template.class);
+                        String relation = "".equals(t.value()) ? prop.getName() : t.value();
+                        Object value = prop.get(bean);
+                        if (value instanceof HALTemplate) {
+                            addTemplate(relation, (HALTemplate) value);
                         }
                     } else {
                         state.add(prop);
@@ -245,6 +255,16 @@ public class HALBeanSerializer extends BeanSerializerBase {
                 jgen.writeEndObject();
             }
 
+            if (!templates.isEmpty()) {
+                jgen.writeName("_templates");
+                jgen.writeStartObject();
+                for (String rel : templates.keySet()) {
+                    jgen.writeName(rel);
+                    templates.get(rel).serialize(jgen);
+                }
+                jgen.writeEndObject();
+            }
+
             for (BeanPropertyWriter prop : state) {
                 try {
                     prop.serializeAsProperty(bean, jgen, provider);
@@ -272,6 +292,12 @@ public class HALBeanSerializer extends BeanSerializerBase {
             }
         }
 
+        private void addTemplate(String rel, HALTemplate template) {
+            if (templates.put(rel, new TemplateProperty(template)) != null) {
+                LOG.warn("Template already existed with rel [{}] in class [{}]", rel, _handledType);
+            }
+        }
+
         private String applyCurieToRel(String rel, String curie) {
             return (null == curie) ? rel : curie + ":" + rel;
         }
@@ -291,6 +317,54 @@ public class HALBeanSerializer extends BeanSerializerBase {
         }
     }
 
+    private static class TemplateProperty {
+        private final HALTemplate template;
+
+        private TemplateProperty(HALTemplate template) {
+            this.template = template;
+        }
+
+        private void serialize(JsonGenerator jgen) {
+            jgen.writeStartObject();
+            if (template.getTitle() != null) {
+                jgen.writeStringProperty("title", template.getTitle());
+            }
+            if (template.getMethod() != null) {
+                jgen.writeStringProperty("method", template.getMethod());
+            }
+            if (template.getContentType() != null) {
+                jgen.writeStringProperty("contentType", template.getContentType());
+            }
+            if (template.getProperties() != null && !template.getProperties().isEmpty()) {
+                jgen.writeName("properties");
+                jgen.writeStartArray();
+                for (HALTemplate.Property property : template.getProperties()) {
+                    jgen.writeStartObject();
+                    if (property.getName() != null) {
+                        jgen.writeStringProperty("name", property.getName());
+                    }
+                    if (property.getPrompt() != null) {
+                        jgen.writeStringProperty("prompt", property.getPrompt());
+                    }
+                    if (property.getRequired() != null) {
+                        jgen.writeBooleanProperty("required", property.getRequired());
+                    }
+                    if (property.getReadOnly() != null) {
+                        jgen.writeBooleanProperty("readOnly", property.getReadOnly());
+                    }
+                    if (property.getRegex() != null) {
+                        jgen.writeStringProperty("regex", property.getRegex());
+                    }
+                    if (property.getValue() != null) {
+                        jgen.writePOJOProperty("value", property.getValue());
+                    }
+                    jgen.writeEndObject();
+                }
+                jgen.writeEndArray();
+            }
+            jgen.writeEndObject();
+        }
+    }
 
     /**
      * Representing either a single link (one-to-one relation) or a collection of links.

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import io.openapitools.jackson.dataformat.hal.annotation.EmbeddedResource;
 import io.openapitools.jackson.dataformat.hal.annotation.Link;
+import io.openapitools.jackson.dataformat.hal.annotation.Template;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -16,7 +17,9 @@ import java.util.UUID;
  */
 public enum ReservedProperty {
 
-    LINKS("_links", Link.class), EMBEDDED("_embedded", EmbeddedResource.class);
+    LINKS("_links", Link.class),
+    EMBEDDED("_embedded", EmbeddedResource.class),
+    TEMPLATES("_templates", Template.class);
 
     private final String name;
     private final UUID prefix = UUID.randomUUID();

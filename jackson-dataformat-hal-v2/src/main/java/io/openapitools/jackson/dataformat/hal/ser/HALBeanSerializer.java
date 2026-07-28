@@ -12,10 +12,12 @@ import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
 import com.fasterxml.jackson.databind.util.NameTransformer;
 import io.openapitools.jackson.dataformat.hal.HALLink;
+import io.openapitools.jackson.dataformat.hal.HALTemplate;
 import io.openapitools.jackson.dataformat.hal.annotation.Curie;
 import io.openapitools.jackson.dataformat.hal.annotation.Curies;
 import io.openapitools.jackson.dataformat.hal.annotation.EmbeddedResource;
 import io.openapitools.jackson.dataformat.hal.annotation.Link;
+import io.openapitools.jackson.dataformat.hal.annotation.Template;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,6 +94,7 @@ public class HALBeanSerializer extends BeanSerializerBase {
 
         private List<BeanPropertyWriter> state = new ArrayList<>();
         private Map<String, LinkProperty> links = new TreeMap<>();
+        private Map<String, TemplateProperty> templates = new TreeMap<>();
         private Map<String, BeanPropertyWriter> embedded = new TreeMap<>();
 
         // All of the possible curies that COULD be used (provided via Curie/Curies annotations)
@@ -142,6 +145,13 @@ public class HALBeanSerializer extends BeanSerializerBase {
                             addLinks(relation, (Collection<HALLink>) prop.get(bean), curie);
                         } else if (value instanceof HALLink) {
                             addLink(relation, (HALLink) prop.get(bean), curie);
+                        }
+                    } else if (prop.getAnnotation(Template.class) != null) {
+                        Template t = prop.getAnnotation(Template.class);
+                        String relation = "".equals(t.value()) ? prop.getName() : t.value();
+                        Object value = prop.get(bean);
+                        if (value instanceof HALTemplate) {
+                            addTemplate(relation, (HALTemplate) value);
                         }
 
                     } else {
@@ -222,6 +232,16 @@ public class HALBeanSerializer extends BeanSerializerBase {
                 jgen.writeEndObject();
             }
 
+            if (!templates.isEmpty()) {
+                jgen.writeFieldName("_templates");
+                jgen.writeStartObject();
+                for (String rel : templates.keySet()) {
+                    jgen.writeFieldName(rel);
+                    templates.get(rel).serialize(jgen);
+                }
+                jgen.writeEndObject();
+            }
+
             for (BeanPropertyWriter prop : state) {
                 try {
                     prop.serializeAsField(bean, jgen, provider);
@@ -249,6 +269,12 @@ public class HALBeanSerializer extends BeanSerializerBase {
             }
         }
 
+        private void addTemplate(String rel, HALTemplate template) {
+            if (templates.put(rel, new TemplateProperty(template)) != null) {
+                LOG.warn("Template already existed with rel [{}] in class [{}]", rel, _handledType);
+            }
+        }
+
         private String applyCurieToRel(String rel, String curie) {
             return (null == curie) ? rel : curie + ":" + rel;
         }
@@ -265,6 +291,54 @@ public class HALBeanSerializer extends BeanSerializerBase {
                     return null;
                 }
             });
+        }
+    }
+
+    private static class TemplateProperty {
+        private final HALTemplate template;
+
+        private TemplateProperty(HALTemplate template) {
+            this.template = template;
+        }
+
+        private void serialize(JsonGenerator jgen) throws IOException {
+            jgen.writeStartObject();
+            if (template.getTitle() != null) {
+                jgen.writeStringField("title", template.getTitle());
+            }
+            if (template.getMethod() != null) {
+                jgen.writeStringField("method", template.getMethod());
+            }
+            if (template.getContentType() != null) {
+                jgen.writeStringField("contentType", template.getContentType());
+            }
+            if (template.getProperties() != null && !template.getProperties().isEmpty()) {
+                jgen.writeArrayFieldStart("properties");
+                for (HALTemplate.Property property : template.getProperties()) {
+                    jgen.writeStartObject();
+                    if (property.getName() != null) {
+                        jgen.writeStringField("name", property.getName());
+                    }
+                    if (property.getPrompt() != null) {
+                        jgen.writeStringField("prompt", property.getPrompt());
+                    }
+                    if (property.getRequired() != null) {
+                        jgen.writeBooleanField("required", property.getRequired());
+                    }
+                    if (property.getReadOnly() != null) {
+                        jgen.writeBooleanField("readOnly", property.getReadOnly());
+                    }
+                    if (property.getRegex() != null) {
+                        jgen.writeStringField("regex", property.getRegex());
+                    }
+                    if (property.getValue() != null) {
+                        jgen.writeObjectField("value", property.getValue());
+                    }
+                    jgen.writeEndObject();
+                }
+                jgen.writeEndArray();
+            }
+            jgen.writeEndObject();
         }
     }
 
